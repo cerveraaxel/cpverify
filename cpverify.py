@@ -22,11 +22,12 @@ def is_ipv4():
 
 def main():
     if is_ipv4():
-        print("License data for IP address:" + ip_addr + "\n")
+        print("License data for IP address:", ip_addr + "\n")
         with urllib.request.urlopen(url) as response:
             html = response.read()
             html = str(html.decode('utf-8'))
             print(html)
+            print(url.split('&')[0])
 
 if __name__ == '__main__':
     main()
