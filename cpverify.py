@@ -3,34 +3,43 @@ import socket
 import sys
 import urllib.request
 
-class Vars:
+class Verify:
+    def __init__(self, ip):
+        self.ip = ip
+        self.base_url = "https://verify.cpanel.net/app/verify?ip="
+        self.lookup_url = self.base_url + self.ip + "&nohtml=1"
+
+    @property
+    def ip(self):
+        return self._ip
+
+    @ip.setter
+    def ip(self, ip):
+        try:
+            socket.inet_pton(socket.AF_INET, ip)
+            self._ip = ip
+        except:
+            socket.error
+            print("Not a valid IPv4 address!")
+            exit()
+
+    def check(self):
+        with urllib.request.urlopen(self.lookup_url) as response:
+            page = response.read()
+            page = str(page.decode("utf-8"))
+            if page:
+                print("License data for IP address:", self.ip)
+                print(page)
+                print(self.lookup_url.split("&")[0])
+            else:
+                print("No license found for this IP")
+
+def main():
     if len(sys.argv) > 1:
-        ip_addr = sys.argv[1]
+        Verify(sys.argv[1]).check()
     else:
         print("Please provide an IP")
         exit()
-    url = 'https://verify.cpanel.net/app/verify?ip=' + ip_addr + '&nohtml=1'
-
-def is_ipv4():
-    try:
-        socket.inet_pton(socket.AF_INET, Vars.ip_addr)
-        return True
-    except:
-        socket.error
-        print("Not a valid IP address!")
-        return False
-
-def main():
-    if is_ipv4():
-        print("License data for IP address:", Vars.ip_addr + "\n")
-        with urllib.request.urlopen(Vars.url) as response:
-            html = response.read()
-            html = str(html.decode('utf-8'))
-            if html:
-                print(html)
-                print(Vars.url.split('&')[0])
-            else:
-                print("No license found")
 
 if __name__ == '__main__':
     main()
